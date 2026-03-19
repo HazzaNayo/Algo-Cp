@@ -38,7 +38,7 @@ BAKSO_PRICE          = 15_000     # Harga bakso (Rp)
 TIP_AMOUNT           = 5_000      # Bonus tip saat bar > 70%
 GAME_DURATION        = 180.0      # Durasi ronde (detik) = 3 menit
 MAX_LIVES            = 3          # Nyawa awal
-MAX_QUEUE            = 3          # Maks pembeli di antrian
+MAX_QUEUE            = 1          # Maks pembeli di antrian (1 = satu per satu)
 
 # ─── Spawn ───────────────────────────────────────────────────────────────────
 SPAWN_INTERVAL       = 6.0        # Jeda antar pembeli baru (detik)
@@ -48,41 +48,70 @@ POOR_CUSTOMER_CHANCE = 0.30       # 30% kemungkinan pembeli fakir
 PATIENCE_DURATION    = 30.0       # Bar kesabaran habis dalam X detik
 TIP_PATIENCE_THRESH  = 0.70       # Di atas % ini → dapat tip
 CUSTOMER_SPEED       = 180        # Pixel per detik (gerak menuju gerobak)
-CUSTOMER_WAIT_X      = 820        # X posisi tunggu di depan gerobak
-CUSTOMER_WAIT_Y      = 175        # Y posisi tunggu
+CUSTOMER_WAIT_X      = 500        # X posisi tunggu di depan gerobak
+CUSTOMER_WAIT_Y      = 225        # Y posisi tunggu
 QUEUE_SPACING        = 160        # Jarak antar pembeli dalam antrian
-PEMBELI_SCALE        = 0.95
+PEMBELI_SCALE        = 0.65
 PEMBELI_POS_X        = 350
 PEMBELI_POS_Y        = 120
 
 # ─── Cooking Stations ────────────────────────────────────────────────────────
 # Panci Bakso
-BAKSO_STATION_X      = 310
-BAKSO_STATION_Y      = 205
+BAKSO_STATION_X      = 336
+BAKSO_STATION_Y      = 240
 COOK_TIME            = 3.0        # Detik untuk memasak bakso
 
-# Ketel Kuah
-KUAH_STATION_X       = 490
-KUAH_STATION_Y       = 205
-KUAH_TIME            = 2.0        # Detik untuk nuang kuah
+# Mie
+MIE_STATION_X        = 983
+MIE_STATION_Y        = 371
+MIE_TIME             = 2.0        # Detik untuk menambah mie
+
+# Sayuran
+SAYURAN_STATION_X    = 1025
+SAYURAN_STATION_Y    = 216
+SAYURAN_TIME         = 1.5        # Detik untuk menambah sayuran
 
 # ─── Mangkok ─────────────────────────────────────────────────────────────────
 MANGKOK_SCALE        = 0.20
 MANGKOK_POS_X        = 250
 MANGKOK_POS_Y        = 77
 
+# Bowl display (layer terpisah — di-overlay satu per satu)
+BOWL_DISPLAY_X       = 730
+BOWL_DISPLAY_Y       = 100
+BOWL_DISPLAY_SCALE   = 0.25
+# Bowl display — gambar mangkok berubah sesuai bahan yang sudah ditambahkan
+BOWL_STAGES = {
+    frozenset():                          f"{ITEMS_PATH}/Mangkok.jpeg",
+    frozenset({"bakso"}):                  f"{ITEMS_PATH}/Mangkok_bakso.jpeg",
+    frozenset({"bakso", "mie"}):           f"{ITEMS_PATH}/Mangkok_baksomie.jpeg",
+    frozenset({"bakso", "mie", "sayuran"}): f"{ITEMS_PATH}/Mangkok_lengkap.jpeg",
+}
+
+# Order images — gambar pesanan yang ditampilkan di cloud bubble pembeli
+ORDER_IMAGES = {
+    "bakso":    f"{ITEMS_PATH}/Mangkok_bakso.jpeg",
+    "baksomie": f"{ITEMS_PATH}/Mangkok_baksomie.jpeg",
+    "lengkap":  f"{ITEMS_PATH}/Mangkok_lengkap.jpeg",
+}
+
+# Order types dan bahan yang dibutuhkan
+ORDER_RECIPES = {
+    "bakso":    {"bakso"},
+    "baksomie": {"bakso", "mie"},
+    "lengkap":  {"bakso", "mie", "sayuran"},
+}
+
+# Order bubble config (cloud dialog di atas pembeli)
+ORDER_BUBBLE_OFFSET_Y = 130       # Jarak Y di atas pembeli
+ORDER_BUBBLE_SCALE    = 0.12      # Skala gambar pesanan di bubble
+ORDER_BUBBLE_RADIUS   = 55        # Radius bubble cloud
+
 # ─── Combo ───────────────────────────────────────────────────────────────────
 COMBO_THRESHOLD      = 3          # Berapa pelayanan beruntun untuk combo
 COMBO_MULTIPLIER     = 2          # Uang x2 saat combo aktif
 
-# ─── Upgrades ────────────────────────────────────────────────────────────────
-UPGRADES = {
-    "kuah_turbo":  {"name": "Kuah Turbo",    "price": 50_000,  "desc": "Kuah 2s → 1s"},
-    "wajan_ajaib": {"name": "Wajan Ajaib",   "price": 80_000,  "desc": "Masak 3s → 1.5s"},
-    "gerobak_cute":{"name": "Gerobak Cute",  "price": 120_000, "desc": "Kesabaran +20%"},
-}
 
-# ─── HUD ─────────────────────────────────────────────────────────────────────
 HUD_FONT_SIZE   = 20
 HUD_PADDING     = 16
 HUD_HEIGHT      = 56

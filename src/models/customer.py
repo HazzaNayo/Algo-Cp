@@ -8,7 +8,9 @@ import random
 from config import (
     PATIENCE_DURATION, CUSTOMER_SPEED, CUSTOMER_WAIT_X, CUSTOMER_WAIT_Y,
     QUEUE_SPACING, POOR_CUSTOMER_CHANCE, PEMBELI_SCALE, CHARACTERS_PATH,
-    SCREEN_WIDTH, TIP_PATIENCE_THRESH
+    SCREEN_WIDTH, TIP_PATIENCE_THRESH,
+    ORDER_IMAGES, ORDER_RECIPES,
+    ORDER_BUBBLE_OFFSET_Y, ORDER_BUBBLE_SCALE, ORDER_BUBBLE_RADIUS
 )
 
 
@@ -33,6 +35,7 @@ class Customer(arcade.Sprite):
         self.patience      = PATIENCE_DURATION   # Timer kesabaran
         self.max_patience  = PATIENCE_DURATION
         self.is_poor       = False               # Override di subclass
+        self.order_type    = None                 # Jenis pesanan (bakso/baksomie/lengkap)
 
         # Target posisi tunggu berdasarkan slot
         self.target_x = CUSTOMER_WAIT_X - (queue_slot * QUEUE_SPACING)
@@ -45,6 +48,10 @@ class Customer(arcade.Sprite):
         # Efek state visual
         self.flash_timer   = 0.0
         self.emotion_timer = 0.0   # Timer untuk tampilkan emoji
+
+        # Order bubble sprite (loaded lazily)
+        self._order_sprite = None
+        self._order_sprite_list = None
 
     # ─── Properties ──────────────────────────────────────────────────────────
     @property
@@ -154,7 +161,45 @@ class Customer(arcade.Sprite):
 
     def draw_label(self):
         """Gambar label jenis pembeli."""
-        pass  # Override di subclass jika perlu
+        self.draw_order_bubble()
+
+    def draw_order_bubble(self):
+        """Gambar cloud dialog dengan gambar pesanan di atas pembeli."""
+        if self.state not in (CustomerState.WAITING, CustomerState.SERVED):
+            return
+        if not self.order_type:
+            return
+
+        bx = self.center_x
+        by = self.center_y + ORDER_BUBBLE_OFFSET_Y
+        r  = ORDER_BUBBLE_RADIUS
+
+        # Cloud background (white oval)
+        arcade.draw_ellipse_filled(bx, by, r * 2.2, r * 1.8, (255, 255, 255, 230))
+        arcade.draw_ellipse_outline(bx, by, r * 2.2, r * 1.8, (180, 180, 180, 200), 2)
+
+        # Small cloud circles (tail pointing to customer)
+        arcade.draw_circle_filled(bx - 15, by - r * 0.9 - 8, 10, (255, 255, 255, 220))
+        arcade.draw_circle_outline(bx - 15, by - r * 0.9 - 8, 10, (180, 180, 180, 180), 1)
+        arcade.draw_circle_filled(bx - 8, by - r * 0.9 - 22, 6, (255, 255, 255, 210))
+        arcade.draw_circle_outline(bx - 8, by - r * 0.9 - 22, 6, (180, 180, 180, 160), 1)
+
+        # Order image sprite
+        if self._order_sprite is None:
+            img_path = ORDER_IMAGES.get(self.order_type)
+            if img_path:
+                try:
+                    self._order_sprite = arcade.Sprite(img_path, ORDER_BUBBLE_SCALE)
+                    self._order_sprite_list = arcade.SpriteList()
+                    self._order_sprite_list.append(self._order_sprite)
+                except Exception as e:
+                    print(f"[WARN] Could not load order image '{img_path}': {e}")
+                    return
+
+        if self._order_sprite:
+            self._order_sprite.center_x = bx
+            self._order_sprite.center_y = by
+            self._order_sprite_list.draw()
 
 
 # ─── Normal Customer ─────────────────────────────────────────────────────────
@@ -191,8 +236,13 @@ class PoorCustomer(Customer):
 
 
 # ─── Factory ─────────────────────────────────────────────────────────────────
+ORDER_TYPES = ["bakso", "baksomie", "lengkap"]
+
 def create_customer(queue_slot: int) -> Customer:
-    """Buat pembeli acak (biasa atau fakir)."""
+    """Buat pembeli acak (biasa atau fakir) dengan pesanan random."""
     if random.random() < POOR_CUSTOMER_CHANCE:
-        return PoorCustomer(queue_slot)
-    return NormalCustomer(queue_slot)
+        c = PoorCustomer(queue_slot)
+    else:
+        c = NormalCustomer(queue_slot)
+    c.order_type = random.choice(ORDER_TYPES)
+    return c

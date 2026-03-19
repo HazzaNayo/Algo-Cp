@@ -70,14 +70,16 @@ class CustomerManager:
     # ─── Spawn ───────────────────────────────────────────────────────────────
     def _try_spawn(self, delta_time: float):
         self.spawn_timer += delta_time
-        queue_count = sum(
-            1 for c in self.customers
-            if c.state in (CustomerState.WALKING, CustomerState.WAITING, CustomerState.SERVED)
+        # Hanya spawn pembeli baru jika tidak ada pembeli aktif sama sekali
+        has_active = any(
+            c.state in (CustomerState.WALKING, CustomerState.WAITING,
+                        CustomerState.SERVED, CustomerState.HAPPY,
+                        CustomerState.ANGRY, CustomerState.LEAVING)
+            for c in self.customers
         )
-        if self.spawn_timer >= self.spawn_interval and queue_count < MAX_QUEUE:
+        if self.spawn_timer >= self.spawn_interval and not has_active:
             self.spawn_timer = 0.0
-            new_slot = queue_count
-            customer = create_customer(new_slot)
+            customer = create_customer(0)  # Selalu slot 0 (hanya 1 pembeli)
             self.customers.append(customer)
             self.sprite_list.append(customer)
 
