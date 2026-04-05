@@ -206,8 +206,11 @@ class Customer(arcade.Sprite):
 class NormalCustomer(Customer):
     """Pembeli biasa — bayar harga normal."""
 
+    _SPRITES = ["Pembeli_Normal1.png", "Pembeli_Normal2.png", "Pembeli_Normal3.png", "Pembeli_Normal4.png", "Pembeli_Normal5.png"]
+
     def __init__(self, queue_slot: int):
-        path = f"{CHARACTERS_PATH}/Pembeli/Pembeli_Normal1.png"
+        sprite_name = random.choice(self._SPRITES)
+        path = f"{CHARACTERS_PATH}/Pembeli/{sprite_name}"
         super().__init__(path, PEMBELI_SCALE, queue_slot)
         self.is_poor = False
 
@@ -216,7 +219,7 @@ class NormalCustomer(Customer):
 class PoorCustomer(Customer):
     """Pembeli fakir — memicu dialog pilihan Gratis / Bayar."""
 
-    _SPRITES = ["Pembeli_fakir1.png"]  # Tambah file lain jika ada
+    _SPRITES = ["Pembeli_fakir1.png", "Pembeli_fakir2.png"]  # tambahkan fakir2
 
     def __init__(self, queue_slot: int):
         sprite_name = random.choice(self._SPRITES)

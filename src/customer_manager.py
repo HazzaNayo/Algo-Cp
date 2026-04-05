@@ -5,8 +5,8 @@ customer_manager.py - Mengelola antrian & spawn pembeli
 import arcade
 import random
 from config import (
-    SPAWN_INTERVAL, MAX_QUEUE, BAKSO_PRICE, TIP_AMOUNT,
-    COMBO_THRESHOLD, COMBO_MULTIPLIER
+    BAKSO_PRICE, MIE_PRICE, SAYURAN_PRICE, TIP_AMOUNT, TIP_PATIENCE_THRESH,
+    SPAWN_INTERVAL, MAX_QUEUE, COMBO_THRESHOLD, COMBO_MULTIPLIER,
 )
 from src.models.customer import Customer, CustomerState, create_customer
 
@@ -131,6 +131,53 @@ class CustomerManager:
             self.on_served_normal(money, pahala, customer.gets_tip and paid)
 
         customer.finish_leave(happy=True)
+
+    def serve_customer(self, idx: int):
+        """Serve customer di index tertentu (untuk rush hour)."""
+        if 0 <= idx < len(self.customers):
+            customer = self.customers[idx]
+            # Proses serve customer
+            money, pahala, got_tip = self._calculate_reward(customer)
+            if customer.is_poor:
+                self.on_served_poor(customer)
+            else:
+                self.on_served_normal(money, pahala, got_tip)
+            # Remove customer dari antrian
+            self.customers.pop(idx)
+            self.combo_count += 1
+
+    def _calculate_reward(self, customer: Customer) -> tuple[int, int, bool]:
+        """
+        Hitung reward berdasarkan ingredients & quantity.
+        Return: (money, pahala, got_tip)
+        """
+        # Base price per mangkok
+        price_per_bowl = 0
+        
+        if customer.order_type == "bakso":
+            price_per_bowl = BAKSO_PRICE
+        elif customer.order_type == "baksomie":
+            price_per_bowl = BAKSO_PRICE + MIE_PRICE
+        elif customer.order_type == "lengkap":
+            price_per_bowl = BAKSO_PRICE + MIE_PRICE + SAYURAN_PRICE
+        
+        # Total money = price per bowl × quantity
+        money = price_per_bowl * customer.order_quantity
+
+        # Pahala berdasarkan kesabaran
+        pahala = 0
+        got_tip = False
+        
+        if customer.patience_percent >= TIP_PATIENCE_THRESH:
+            # Bonus: dapat tip
+            money += TIP_AMOUNT * customer.order_quantity
+            got_tip = True
+        
+        # Pahala bonus jika customer puas
+        if customer.patience_percent > 0.5:
+            pahala = customer.order_quantity  # 1-3 pahala sesuai jumlah pesanan
+
+        return money, pahala, got_tip
 
     # ─── Drawing ─────────────────────────────────────────────────────────────
     def draw(self):

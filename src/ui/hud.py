@@ -10,104 +10,110 @@ from config import (
 
 
 class HUD:
-    """Gambar semua elemen HUD di bagian atas layar."""
+    """Heads-Up Display — menampilkan uang, pahala, nyawa, waktu, combo."""
 
     def __init__(self):
-        self.money    = 0
-        self.pahala   = 0
-        self.lives    = MAX_LIVES
-        self.time_left= GAME_DURATION
-        self.combo    = 0
-        self.tip_flash= 0.0   # Durasi tampil notif tip
-        self.tip_text = ""
-        self.notifs   : list[dict] = []   # Floating notifications
+        self.money = 0
+        self.pahala = 0
+        self.lives = 3
+        self.time_left = 180.0
+        self.combo = 0
+        
+        # Stock tracking
+        self.stock_bakso = 0
+        self.stock_mie = 0
+        self.stock_sayur = 0
 
-    def update(self, delta_time: float):
-        self.tip_flash = max(0.0, self.tip_flash - delta_time)
-        # Update floating notifs
-        for n in self.notifs:
-            n["y"]    += 40 * delta_time
-            n["alpha"] = max(0, n["alpha"] - 180 * delta_time)
-        self.notifs = [n for n in self.notifs if n["alpha"] > 0]
+        self.notifications = []
 
-    def add_notif(self, text: str, color=(255, 255, 100, 255)):
-        self.notifs.append({
-            "text":  text,
-            "x":     SCREEN_WIDTH / 2,
-            "y":     SCREEN_HEIGHT / 2 + 60,
-            "alpha": 255,
+    def add_notif(self, text: str, color: tuple):
+        """Tambah notifikasi yang akan ditampilkan."""
+        self.notifications.append({
+            "text": text,
             "color": color,
-            "size":  22
+            "time": 3.0
         })
 
+    def update(self, delta_time: float):
+        """Update notifikasi (fade out)."""
+        for notif in self.notifications[:]:
+            notif["time"] -= delta_time
+            if notif["time"] <= 0:
+                self.notifications.remove(notif)
+
     def draw(self):
-        # ── Bar HUD background
-        arcade.draw_lbwh_rectangle_filled(
-            0, SCREEN_HEIGHT - HUD_HEIGHT,
-            SCREEN_WIDTH, HUD_HEIGHT,
-            (25, 15, 5, 210)
-        )
-        arcade.draw_lbwh_rectangle_outline(
-            0, SCREEN_HEIGHT - HUD_HEIGHT,
-            SCREEN_WIDTH, HUD_HEIGHT,
-            (200, 160, 60, 180), 2
-        )
+        """Draw HUD elements."""
+        # Background
+        arcade.draw_lbwh_rectangle_filled(0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50, (26, 18, 10, 220))
+        arcade.draw_lbwh_rectangle_outline(0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50, (200, 150, 80, 255), 2)
 
-        y = SCREEN_HEIGHT - HUD_HEIGHT / 2
-
-        # ── 💰 Uang
+        # Uang (dengan warna berbeda jika mines)
+        money_color = (255, 100, 100, 255) if self.money < 0 else (255, 220, 80, 255)
+        money_text = f"💰 Rp{abs(self.money):,}"
+        if self.money < 0:
+            money_text = f"💰 -Rp{abs(self.money):,}"
+        
         arcade.draw_text(
-            f"💰  Rp{self.money:,}",
-            HUD_PADDING, y,
-            (255, 230, 80, 255), font_size=HUD_FONT_SIZE,
-            anchor_x="left", anchor_y="center", bold=True
+            money_text, 20, SCREEN_HEIGHT - 35,
+            money_color,
+            font_size=16, bold=True
         )
 
-        # ── 🙏 Pahala
+        # Stock bahan (di samping uang)
+        stock_text = f"Stok → 🍢 {self.stock_bakso}  |  🍜 {self.stock_mie}  |  🥬 {self.stock_sayur}"
         arcade.draw_text(
-            f"🙏  {self.pahala}",
-            230, y,
-            (150, 255, 200, 255), font_size=HUD_FONT_SIZE,
-            anchor_x="left", anchor_y="center", bold=True
+            stock_text,
+            20, SCREEN_HEIGHT - 65,
+            (150, 220, 150, 220),
+            font_size=10, bold=True
         )
 
-        # ── ❤️ Nyawa (tengah)
-        heart_str = "❤️ " * self.lives + "🖤 " * (MAX_LIVES - self.lives)
+        # Pahala
         arcade.draw_text(
-            heart_str.strip(),
-            SCREEN_WIDTH / 2, y,
-            (255, 80, 80, 255), font_size=HUD_FONT_SIZE,
-            anchor_x="center", anchor_y="center"
+            f"🙏 Pahala: {self.pahala}", 420, SCREEN_HEIGHT - 35,
+            (150, 255, 200, 255),
+            font_size=16, bold=True
         )
 
-        # ── ⏱ Timer
-        mins  = int(self.time_left) // 60
-        secs  = int(self.time_left) % 60
-        t_color = (255, 80, 80, 255) if self.time_left < 30 else (255, 255, 255, 255)
+        # Nyawa
         arcade.draw_text(
-            f"⏱  {mins:02d}:{secs:02d}",
-            SCREEN_WIDTH - 280, y,
-            t_color, font_size=HUD_FONT_SIZE,
-            anchor_x="left", anchor_y="center", bold=True
+            f"❤️ Nyawa: {self.lives}", 720, SCREEN_HEIGHT - 35,
+            (255, 100, 100, 255) if self.lives <= 1 else (255, 200, 200, 255),
+            font_size=16, bold=True
         )
 
-        # ── COMBO
-        if self.combo >= 3:
+        # Waktu
+        minutes = int(self.time_left) // 60
+        seconds = int(self.time_left) % 60
+        arcade.draw_text(
+            f"⏱️ {minutes}:{seconds:02d}", 1000, SCREEN_HEIGHT - 35,
+            (100, 200, 255, 255),
+            font_size=16, bold=True
+        )
+
+        # Combo
+        if self.combo > 1:
             arcade.draw_text(
-                f"🔥 COMBO x{self.combo}",
-                SCREEN_WIDTH - HUD_PADDING, y,
-                (255, 160, 20, 255), font_size=HUD_FONT_SIZE,
-                anchor_x="right", anchor_y="center", bold=True
+                f"🔥 x{self.combo}", 1150, SCREEN_HEIGHT - 35,
+                (255, 150, 50, 255),
+                font_size=16, bold=True
             )
 
-        # ── Floating notifications
-        for n in self.notifs:
-            alpha = int(n["alpha"])
-            color = n["color"][:3] + (alpha,)
+        # Notifikasi
+        self._draw_notifications()
+
+    def _draw_notifications(self):
+        """Draw notifikasi yang sedang aktif."""
+        y_offset = 0
+        for notif in self.notifications:
+            alpha = int(255 * (notif["time"] / 3.0))  # Fade out
+            color = (*notif["color"][:3], alpha)
             arcade.draw_text(
-                n["text"], n["x"], n["y"],
-                color, font_size=n["size"],
-                anchor_x="center", anchor_y="center", bold=True
+                notif["text"],
+                SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150 - y_offset,
+                color,
+                font_size=12, anchor_x="center", anchor_y="center", bold=True
             )
+            y_offset += 25
 
 

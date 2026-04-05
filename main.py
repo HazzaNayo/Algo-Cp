@@ -1,12 +1,12 @@
-
 import arcade
 from src.game import BaksoGame
+from src.game import GameState
 
 
 def main():
     """Main function"""
     game = BaksoGame()
-    game.setup()
+    game.state = GameState.MENU  # Mulai dari MENU, bukan langsung setup
     arcade.run()
 
 

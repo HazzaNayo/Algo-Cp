@@ -1,4 +1,4 @@
-# Game Penjual Bakso
+# Bakso Simulator: Kindness For A Better World
 
 Game sederhana tentang penjual bakso menggunakan Python Arcade.
 

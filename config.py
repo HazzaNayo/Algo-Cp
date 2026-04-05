@@ -7,6 +7,7 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 SCREEN_TITLE = "Game Penjual Bakso"
 FPS = 60
+FULLSCREEN = False  # Set True untuk fullscreen
 
 # ─── Colors ──────────────────────────────────────────────────────────────────
 WHITE       = (255, 255, 255)
@@ -34,7 +35,9 @@ BACKGROUNDS_PATH= f"{IMAGES_PATH}/backgrounds"
 UI_PATH         = f"{IMAGES_PATH}/ui"
 
 # ─── Game Mechanics ──────────────────────────────────────────────────────────
-BAKSO_PRICE          = 15_000     # Harga bakso (Rp)
+BAKSO_PRICE          = 10_000     # Harga bakso (Rp)
+MIE_PRICE            = 5_000      # Harga mie (Rp)
+SAYURAN_PRICE        = 5_000      # Harga sayuran (Rp)
 TIP_AMOUNT           = 5_000      # Bonus tip saat bar > 70%
 GAME_DURATION        = 180.0      # Durasi ronde (detik) = 3 menit
 MAX_LIVES            = 3          # Nyawa awal
@@ -42,7 +45,8 @@ MAX_QUEUE            = 1          # Maks pembeli di antrian (1 = satu per satu)
 
 # ─── Spawn ───────────────────────────────────────────────────────────────────
 SPAWN_INTERVAL       = 6.0        # Jeda antar pembeli baru (detik)
-POOR_CUSTOMER_CHANCE = 0.30       # 30% kemungkinan pembeli fakir
+POOR_CUSTOMER_CHANCE = 0.5         # Probabilitas poor customer muncul (40%)
+NORMAL_CUSTOMER_CHANCE = 0.5       # Probabilitas normal customer muncul (60%)
 
 # ─── Customer ────────────────────────────────────────────────────────────────
 PATIENCE_DURATION    = 30.0       # Bar kesabaran habis dalam X detik
@@ -127,7 +131,35 @@ BUTTON1_WIDTH    = 270
 BUTTON1_HEIGHT   = 180
 BUTTON2_WIDTH    = 270
 BUTTON2_HEIGHT   = 80
-BUTTON1_CENTER_X = 975
+BUTTON1_CENTER_X = 0
 BUTTON1_CENTER_Y = 360
 BUTTON2_CENTER_X = 975
 BUTTON2_CENTER_Y = 210
+
+# ─── Rush Hour (DIHAPUS) ──────────────────────────────────────────────────────
+# RUSH_HOUR_START      = 120.0
+# RUSH_HOUR_DURATION   = 60.0
+# RUSH_HOUR_SPAWN_RATE = 1.5
+# NORMAL_SPAWN_RATE    = 6.0
+# MAX_QUEUE_RUSH       = 8
+# MAX_QUEUE_NORMAL     = 1
+
+# ─── Customer Spawn ───────────────────────────────────────────────────────────
+SPAWN_RATE           = 6.0        # Spawn customer setiap 6 detik
+MAX_QUEUE            = 1          # Maksimal pembeli di antrian
+
+# ─── Penalty ──────────────────────────────────────────────────────────────────
+RESET_PENALTY = 5_000              # Denda setiap kali klik tombol ULANG (Rp)
+
+# ─── Store ───────────────────────────────────────────────────────────────────
+STORE_BAKSO_PRICE    = 5_000      # Harga bakso di store (Rp)
+STORE_MIE_PRICE      = 2_000      # Harga mie di store (Rp)
+STORE_SAYUR_PRICE    = 2_000      # Harga sayuran di store (Rp)
+INITIAL_STOCK_BAKSO  = 30         # Stock awal bakso (modal pemain)
+INITIAL_STOCK_MIE    = 30         # Stock awal mie (modal pemain)
+INITIAL_STOCK_SAYUR  = 30         # Stock awal sayuran (modal pemain)
+INITIAL_MONEY        = 0           # Uang awal pemain (Rp)
+
+# ─── Poor Customer ────────────────────────────────────────────────────────────
+MAX_POOR_CUSTOMERS   = 5           # Maksimal poor customer yang bisa muncul
+POOR_CUSTOMER_BONUS_TIME = 30.0    # Bonus waktu saat memberi gratis (detik)
